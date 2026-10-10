@@ -27,6 +27,20 @@ Reply ONLY JSON: {"qualified":"YES|NO|UNSURE","reason":"<=20 words","priority":"
   // Rough INR cost (Flash ~ $0.30 / 1M in, $2.50 / 1M out, 1 USD ~ 88 INR) — update if pricing changes
   const ai_cost_inr = ((usage.promptTokenCount || 0) * 0.3 + (usage.candidatesTokenCount || 0) * 2.5) / 1e6 * 88;
   let out: any = {};
-  try { out = JSON.parse(text); } catch { out = { qualified: "UNSURE", reason: "classifier parse error", priority: "NORMAL", route_to: "human_review" }; }
+  try { out = JSON.parse(text); } catch { out = {}; }
+  // Fallback: if Gemini errored or returned nothing usable, use Vaani's own "Lead Qualified" extraction.
+  if (!["YES", "NO", "UNSURE"].includes(String(out.qualified || "").toUpperCase())) {
+    const vq = String(fields.vaani_qualified || "").toUpperCase();
+    const q = ["YES", "NO", "UNSURE"].includes(vq) ? vq : "UNSURE";
+    const err = j?.error?.message ? `Gemini error: ${String(j.error.message).slice(0, 80)}` : "Gemini returned no result";
+    out = {
+      qualified: q,
+      reason: `Vaani extraction used (${err})`,
+      priority: q === "YES" ? "HIGH" : "NORMAL",
+      route_to: q === "NO" ? "none" : q === "YES" ? (/office|commercial|clinic|studio/i.test(String(fields.property_type || "")) ? "commercial" : "residential") : "human_review",
+      summary: fields.vaani_summary,
+    };
+  }
+  out.qualified = String(out.qualified).toUpperCase();
   return { ...out, ai_cost_inr };
 }
