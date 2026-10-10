@@ -1,4 +1,5 @@
 export async function sendHandoff(c: any) {
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) return false;
   const esc = (s: any) => String(s ?? "—").replace(/[<>&]/g, (m) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[m]!));
   const text = [
     `🏠 <b>NEW LEAD — ${esc(c.qualified)} | ${esc(c.priority)}</b>  → ${esc(c.route_to)}`,
