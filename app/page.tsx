@@ -1,4 +1,5 @@
 import { db } from "@/lib/supabase";
+import TriggerCall from "./TriggerCall";
 export const dynamic = "force-dynamic";
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
@@ -31,6 +32,7 @@ export default async function Page() {
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: 24 }}>
       <h1 style={{ marginBottom: 4 }}>Aangan Studio · Enquiry Dashboard</h1>
       <p style={{ marginTop: 0, color: "#5b6785" }}>Every phone enquiry, answered by Riya. Live from Supabase — no manual counting.</p>
+      <TriggerCall />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12, margin: "20px 0" }}>
         {tiles.map(([k, v]) => (
           <div key={k as string} style={{ background: "#fff", borderRadius: 12, padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,.06)" }}>
