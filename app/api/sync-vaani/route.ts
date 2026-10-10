@@ -15,7 +15,13 @@ export async function GET(req: NextRequest) {
   let h: Record<string, string> = { "X-API-Key": key };
 
   // Try a few request shapes; report Vaani's own error text if all fail.
+  // Vaani bug: the key resolves client_id to the org NAME, so /call-history 500s.
+  // Call the underlying /call-history/{user_id}/{client_id} path with the real UUIDs instead.
+  const USER = process.env.VAANI_USER_ID || "d1939dea-70d1-7073-99e6-319d4f39e630";
+  const CLIENT = process.env.VAANI_CLIENT_ID || "a9ce6c93-f330-4425-ac81-ca1173562fc6";
   const tries: [string, Record<string, string>][] = [
+    [`${API}/call-history/${USER}/${CLIENT}?page=1&page_size=50&direction=`, { "X-API-Key": key }],
+    [`https://app.vaanivoice.ai/api/call-history/${USER}/${CLIENT}?page=1&page_size=50&direction=`, { "X-API-Key": key }],
     [`${API}/call-history?page=1&page_size=20`, { "X-API-Key": key }],
     [`${API}/call-history`, { "X-API-Key": key }],
     [`${API}/call-history?page=1&page_size=20`, { Authorization: `Bearer ${key}` }],
@@ -44,7 +50,8 @@ export async function GET(req: NextRequest) {
   const results: any[] = [];
   for (const c of todo) {
     const d = await fetch(`${API}/call_details/${encodeURIComponent(c.call_id)}`, { headers: h, cache: "no-store" }).then((r) => r.json()).catch(() => null);
-    if (!d || typeof d.entity !== "object") continue; // not post-processed yet
+    const ent = d && d.entity && typeof d.entity === "object" ? d.entity : c.call_entity && Object.keys(c.call_entity).length ? c.call_entity : null;
+    if (!ent) continue; // not post-processed yet
     const start = Date.parse(c.Start_time), end = Date.parse(c.End_time);
     const durMs = isFinite(start) && isFinite(end) && end > start ? end - start : Number(c.duration_ms || 0);
     const payload = {
@@ -54,9 +61,9 @@ export async function GET(req: NextRequest) {
         call_id: c.call_id,
         call_duration: durMs,
         phone_number: c.from_number || c.call_metadata?.phone || null,
-        summary: d.summary || c.call_summary,
-        entities: d.entity,
-        transcript: d.transcription,
+        summary: d?.summary || c.call_summary,
+        entities: ent,
+        transcript: typeof d?.transcription === "string" ? d.transcription : c.chat_history?.length ? JSON.stringify(c.chat_history) : null,
         source: "vaani-sync",
       },
     };
