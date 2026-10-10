@@ -9,13 +9,31 @@ const API = "https://api.vaanivoice.ai/api";
 const AGENT = process.env.VAANI_AGENT_NAME || "aangan-enquiry-riya";
 
 export async function GET(req: NextRequest) {
-  const key = process.env.VAANI_API_KEY;
+  let key = process.env.VAANI_API_KEY;
   if (!key) return NextResponse.json({ error: "VAANI_API_KEY not set" }, { status: 500 });
-  const h = { "X-API-Key": key };
+  key = key.trim();
+  let h: Record<string, string> = { "X-API-Key": key };
 
-  const hist = await fetch(`${API}/call-history?page=1&page_size=50`, { headers: h, cache: "no-store" });
-  if (!hist.ok) return NextResponse.json({ error: `call-history ${hist.status}` }, { status: 502 });
-  const calls: any[] = (await hist.json())?.data || [];
+  // Try a few request shapes; report Vaani's own error text if all fail.
+  const tries: [string, Record<string, string>][] = [
+    [`${API}/call-history?page=1&page_size=20`, { "X-API-Key": key }],
+    [`${API}/call-history`, { "X-API-Key": key }],
+    [`${API}/call-history?page=1&page_size=20`, { Authorization: `Bearer ${key}` }],
+    [`${API}/call-history?page=1&page_size=20`, { "x-api-key": key, Accept: "application/json" }],
+  ];
+  const attempts: any[] = [];
+  let calls: any[] | null = null;
+  for (const [url, hdr] of tries) {
+    const r = await fetch(url, { headers: hdr, cache: "no-store" }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) } as any));
+    if (r.ok) {
+      const j = await r.json().catch(() => null);
+      calls = j?.data || j?.calls || (Array.isArray(j) ? j : []);
+      h = hdr;
+      break;
+    }
+    attempts.push({ url: url.replace(API, ""), auth: Object.keys(hdr)[0], status: r.status, body: (await r.text()).slice(0, 300) });
+  }
+  if (!calls) return NextResponse.json({ error: "call-history failed", attempts }, { status: 502 });
   const mine = calls.filter((c) => c.agent_name === AGENT && c.post_processing_status === "completed");
 
   const ids = mine.map((c) => c.call_id);
