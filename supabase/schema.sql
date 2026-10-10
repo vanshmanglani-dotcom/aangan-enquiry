@@ -29,3 +29,12 @@ create table if not exists calls (
 );
 create index if not exists calls_created_at_idx on calls (created_at desc);
 alter table calls enable row level security;  -- only the server (service role) reads/writes
+
+-- Calls placed from the dashboard "Trigger call" button; sync-vaani polls these by id.
+create table if not exists pending_calls (
+  vaani_call_id text primary key,
+  phone         text,
+  name          text,
+  created_at    timestamptz not null default now()
+);
+alter table pending_calls enable row level security;
