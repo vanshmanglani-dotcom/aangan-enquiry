@@ -31,20 +31,16 @@ export default function TriggerCall() {
     }
   }
 
-  const input = { padding: "10px 12px", borderRadius: 8, border: "1px solid #d5d9e3", fontSize: 15, minWidth: 0 } as const;
   return (
-    <form onSubmit={go} style={{ background: "#fff", borderRadius: 12, padding: 16, margin: "0 0 20px", boxShadow: "0 1px 3px rgba(0,0,0,.06)" }}>
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>Test Riya on a real phone</div>
-      <div style={{ fontSize: 13, color: "#5b6785", marginBottom: 12 }}>Enter a mobile number and Riya will call it.</div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <input style={{ ...input, flex: "2 1 180px" }} placeholder="Mobile number, e.g. 98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" required />
-        <input style={{ ...input, flex: "1 1 140px" }} placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
-        <input style={{ ...input, flex: "0 1 110px" }} placeholder="PIN" type="password" value={pin} onChange={(e) => setPin(e.target.value)} required />
-        <button disabled={busy} style={{ padding: "10px 18px", borderRadius: 8, border: 0, background: "#1b2a4a", color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer", opacity: busy ? 0.6 : 1 }}>
-          {busy ? "Calling…" : "📞 Trigger call"}
-        </button>
+    <form onSubmit={go} className="tc-form">
+      <div className="tc-hint">Enter a mobile number and Riya will call it. Pick up and talk like a customer.</div>
+      <div className="tc-row">
+        <input className="tc-in" placeholder="Mobile number, e.g. 98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" required />
+        <input className="tc-in" placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="tc-in pin" placeholder="PIN" type="password" value={pin} onChange={(e) => setPin(e.target.value)} required />
+        <button className="tc-btn" disabled={busy}>{busy ? "Calling…" : "Trigger call →"}</button>
       </div>
-      {msg && <div style={{ marginTop: 10, fontSize: 14, color: msg.ok ? "#1a7f37" : "#b42318" }}>{msg.text}</div>}
+      {msg && <div className={"tc-msg " + (msg.ok ? "ok" : "err")}>{msg.text}</div>}
     </form>
   );
 }
