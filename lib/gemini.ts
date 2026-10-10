@@ -1,8 +1,7 @@
-// Gemini Flash: cheap, fast classification + routing. No judgment calls — humans own UNSURE.
-const RULE = `QUALIFIED = YES if Pune area AND full home or office scope AND budget >= 8 lakh AND timeline <= 6 months.
-NO if outside the service area or a service the studio does not offer. Otherwise UNSURE.
-PRIORITY = HIGH if the caller was upset, asked for a human/Nikhil, or is YES; else NORMAL.
-ROUTE = residential (homes), commercial (offices), human_review (UNSURE or HIGH-upset), none (NO).`;
+// Gemini Flash: cheap, fast classification + routing using Nikhil's qualified.md rubric. Humans own UNSURE.
+const RULE = `Apply Nikhil's 5 criteria. YES = real project (design+execution, at least one room), Pune city or PCMC, site available for execution within ~8-10 weeks with a realistic completion date, no volunteered budget clearly below scope, caller is decision-maker or authorised (or owners attend consultation). Unclear on budget or decision-maker = still YES (note it). NO = outside Pune/PCMC, advice-only, timeline impossible (e.g. done in 3 weeks), volunteered budget clearly too low, out-of-scope service (restaurant, gym, commercial under ~500 sq ft), or two+ criteria fail. UNSURE = unclear on project type, area or timeline and caller did not answer. Existing-client complaints = UNSURE with priority HIGH.
+PRIORITY = HIGH if existing-client complaint, caller frustrated about a missed follow-up, or asked for Nikhil/a senior person; else NORMAL.
+ROUTE = residential (homes), commercial (offices), human_review (UNSURE or existing client), none (NO).`;
 
 export async function classify(fields: Record<string, any>, transcript: string) {
   const prompt = `You classify inbound enquiry calls for Aangan Studio (interior design, Pune).
