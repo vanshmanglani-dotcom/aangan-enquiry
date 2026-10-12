@@ -9,7 +9,7 @@ const STEPS: { sel: string; title: string; body: string; bonus?: boolean }[] = [
   { sel: ".tiles", title: "The numbers", body: "Calls, answer time, after-hours share, qualified leads and the full tool cost (Vaani + AI), including cost per qualified lead." },
   { sel: ".hours", title: "When people call", body: "Calls by hour. Orange striped bars are after-hours calls, the ones a human team would have missed." },
   { sel: ".mix", title: "Lead mix", body: "YES goes to a designer on Telegram (and HubSpot). UNSURE goes to human review. NO is logged and never rejected by a bot." },
-  { sel: ".tc-form", bonus: true, title: "Test Riya on a real phone", body: "Beyond the brief: type any Indian mobile number and the PIN, and Riya phones it within seconds. Talk like a customer; a minute after you hang up, the lead appears in the ledger, on Telegram and in HubSpot." },
+  { sel: ".tc-form", bonus: true, title: "Test Riya on a real phone", body: "Beyond the brief: enter the PIN and talk to Riya live in your browser, exactly as a caller would. A minute after you hang up, the lead appears in the ledger, on Telegram and in HubSpot." },
   { sel: ".ledger", title: "The ledger", body: "Every call with its lead score, route and cost. Rows tagged “sample” are demo data." },
 ];
 const GK = ["Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ"];
